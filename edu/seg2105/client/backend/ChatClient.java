@@ -57,9 +57,7 @@ public class ChatClient extends AbstractClient
    */
   public void handleMessageFromServer(Object msg) 
   {
-    clientUI.display(msg.toString());
-    
-    
+    clientUI.display(msg.toString());    
   }
 
   /**
@@ -71,7 +69,13 @@ public class ChatClient extends AbstractClient
   {
     try
     {
-      sendToServer(message);
+    	if (message.startsWith("#")) {
+    		handleCommand(message);
+    	}
+    	
+    	else {
+    		sendToServer(message);	
+    	}
     }
     catch(IOException e)
     {
@@ -79,6 +83,82 @@ public class ChatClient extends AbstractClient
         ("Could not send message to server.  Terminating client.");
       quit();
     }
+  }
+  
+  private void handleCommand (String line) {
+	  String[] command = line.split(" ");
+	  
+	  if (command[0].equals("#quit")) {
+		  quit();
+	  }
+	  
+	  else if (command[0].equals("#logoff")) {
+		  if (!isConnected()) {
+			  clientUI.display("You are already logged off.");
+		  }
+		  
+		  else {
+			  try {
+				  closeConnection();
+			  } 
+			  catch (IOException e) {
+				  clientUI.display("You are already logged off.");
+			  }  
+		  }
+	  }
+	  
+	  else if (command[0].equals("#sethost")) { 
+		  if (!isConnected()) {
+			  setHost(command[1]);
+		  }
+		  
+		  else {
+			  clientUI.display("You cannot change the host while logged in.");		  
+		  }
+	  }
+	  
+	  else if (command[0].equals("#setport")) { 
+		  if (!isConnected()) {
+			  try {
+				  setPort(Integer.parseInt(command[1]));
+			  }
+			  
+			  catch(NumberFormatException e) {
+				  clientUI.display("Invalid port.");
+			  }
+		  }
+		  
+		  else {
+			  clientUI.display("You cannot change port while logged in.");
+		  }
+	  }
+	  
+	  else if (command[0].equals("#login")) { 
+		  if (isConnected()) {
+			  clientUI.display("You are already logged in.");
+		  }
+		  
+		  try {
+			  openConnection();
+		  }
+		  catch (IOException e) {
+			  clientUI.display("Failed to connect.");
+		  }
+	  }
+	  
+	  else if (command[0].equals("#gethost")) { 
+		  //MIGHT HAVE TO MAKE SURE THEY ARE CONNECTED. NOT SURE YET
+		  clientUI.display("Host: " + getHost());    
+	  }
+	  
+	  else if (command[0].equals("#getport")) { 
+		  //MIGHT HAVE TO MAKE SURE THEY ARE CONNECTED. NOT SURE YET
+		  clientUI.display("Port: " + getPort());
+	  }
+	  
+	  else {
+		  clientUI.display("This is an invalid command.");
+	  }
   }
   
   /**
@@ -92,6 +172,30 @@ public class ChatClient extends AbstractClient
     }
     catch(IOException e) {}
     System.exit(0);
+  }
+  
+  /**
+   * Implements the hook method called each time an exception is thrown by the client's
+   * thread that is waiting for messages from the server. The method may be
+   * overridden by subclasses.
+   * 
+   * @param exception
+   *            the exception raised.
+   */
+  @Override
+  protected void connectionException(Exception exception) {
+	  clientUI.display("The server has shut down");
+	  System.exit(0);;
+  }
+  
+  /**
+   * Implements the hook method called after the connection has been closed. The default
+   * implementation does nothing. The method may be overriden by subclasses to
+   * perform special processing such as cleaning up and terminating, or
+   * attempting to reconnect.
+   */
+  protected void connectionClosed() {
+	  clientUI.display("Connection closed");
   }
 }
 //End of ChatClient class
