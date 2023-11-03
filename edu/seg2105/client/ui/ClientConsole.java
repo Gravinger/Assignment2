@@ -50,11 +50,11 @@ public class ClientConsole implements ChatIF
    * @param host The host to connect to.
    * @param port The port to connect on.
    */
-  public ClientConsole(String host, int port) 
+  public ClientConsole(int loginId, String host, int port) 
   {
     try 
     {
-      client= new ChatClient(host, port, this);
+      client= new ChatClient(loginId, host, port, this);
       
       
     } 
@@ -120,27 +120,42 @@ public class ClientConsole implements ChatIF
    *
    * @param args[0] The host to connect to.
    */
-  public static void main(String[] args) 
-  {
-    String host = "";
-    int port = 0;
-
-
-    try
-    {
-      host = args[0];
-      port = Integer.parseInt(args[1]);
-    }
-    catch(ArrayIndexOutOfBoundsException e)
-    {
-      host = "localhost";
-      port = DEFAULT_PORT;
-    }
-    catch (NumberFormatException ne) {
-    	port = DEFAULT_PORT;
-    }
-    ClientConsole chat= new ClientConsole(host, port);
-    chat.accept();  //Wait for console data
-  }
+  	public static void main(String[] args) 
+  	{
+	  int loginId = 0;
+	  String host = "";
+	  int port = 0;
+    
+	  try {
+		  loginId = Integer.parseInt(args[0]);
+	  }
+	  
+	  catch(ArrayIndexOutOfBoundsException e) {
+		  System.out.println("No login ID found. Ending the program.");
+		  System.exit(0);
+	  }
+	  
+	  catch(NumberFormatException e) {
+		  System.out.println("No login ID found. Ending the program.");
+		  System.exit(0);
+	  }
+	  
+	  try
+	  {
+		  host = args[1];
+		  port = Integer.parseInt(args[2]);
+	  }
+	  catch(ArrayIndexOutOfBoundsException e)
+	  {
+		  host = "localhost";
+		  port = DEFAULT_PORT;
+	  }
+	  catch (NumberFormatException ne) {
+		  port = DEFAULT_PORT;
+	  }
+	  
+	  ClientConsole chat= new ClientConsole(loginId, host, port);
+	  chat.accept();  //Wait for console data
+  	}
 }
 //End of ConsoleChat class

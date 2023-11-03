@@ -74,6 +74,16 @@ public class EchoServer extends AbstractServer
 	  
 	  if (command[0].equals("#quit")) {
 		  //NOT SURE ABOUT THIS ONE
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  //DON'T FORGET
 	  }
 	  
 	  else if (command[0].equals("#stop")) {
@@ -141,8 +151,16 @@ public class EchoServer extends AbstractServer
   public void handleMessageFromClient
     (Object msg, ConnectionToClient client)
   {
-    System.out.println("Message received: " + msg + " from " + client);
-    this.sendToAllClients(msg);
+	  if (msg.toString().startsWith("#login")) {
+		  System.out.println("Message received: " + msg + " from " + client);
+		  String[] loginCommand = msg.toString().split(" ");
+		  
+		  client.setInfo("loginID", loginCommand[1]);
+	  }
+	  
+	  else {
+		  this.sendToAllClients(client.getInfo("loginID") + ": " + msg);  
+	  }
   }
     
   /**
