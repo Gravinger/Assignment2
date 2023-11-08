@@ -91,6 +91,15 @@ public class ChatClient extends AbstractClient
 	  String[] command = line.split(" ");
 	  
 	  if (command[0].equals("#quit")) {
+		  try {
+			  sendToServer("#disconnect");
+		  }
+		  
+		  catch (IOException e) {
+			  clientUI.display("Could not send message to server.  Terminating client.");
+			  quit();
+		  }
+		  
 		  quit();
 	  }
 	  
@@ -100,6 +109,15 @@ public class ChatClient extends AbstractClient
 		  }
 		  
 		  else {
+			  try {
+				  sendToServer("#disconnect");
+			  }
+			  
+			  catch (IOException e) {
+				  clientUI.display("Could not send message to server.  Terminating client.");
+				  quit();
+			  }
+			  
 			  try {
 				  closeConnection();
 			  } 
@@ -137,7 +155,15 @@ public class ChatClient extends AbstractClient
 	  
 	  else if (command[0].equals("#login")) { 
 		  if (isConnected()) {
-			  clientUI.display("You are already logged in.");
+			  try {
+				  sendToServer("#login");
+			  }
+			  
+			  catch(IOException e)
+			  {
+				  clientUI.display("Could not send message to server.  Terminating client.");
+				  quit();
+			  }
 		  }
 		  
 		  try {
@@ -149,12 +175,10 @@ public class ChatClient extends AbstractClient
 	  }
 	  
 	  else if (command[0].equals("#gethost")) { 
-		  //MIGHT HAVE TO MAKE SURE THEY ARE CONNECTED. NOT SURE YET
 		  clientUI.display("Host: " + getHost());    
 	  }
 	  
 	  else if (command[0].equals("#getport")) { 
-		  //MIGHT HAVE TO MAKE SURE THEY ARE CONNECTED. NOT SURE YET
 		  clientUI.display("Port: " + getPort());
 	  }
 	  
@@ -168,11 +192,13 @@ public class ChatClient extends AbstractClient
    */
   public void quit()
   {
-    try
-    {
-      closeConnection();
-    }
-    catch(IOException e) {}
+	  if (isConnected()) {
+		    try
+		    {
+		      closeConnection();
+		    }
+		    catch(IOException e) {}
+	  }
     System.exit(0);
   }
   

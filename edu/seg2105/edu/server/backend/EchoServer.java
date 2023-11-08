@@ -73,17 +73,15 @@ public class EchoServer extends AbstractServer
 	  String[] command = line.split(" ");
 	  
 	  if (command[0].equals("#quit")) {
-		  //NOT SURE ABOUT THIS ONE
+		  try {
+			  close();
+		  }
 		  
+		  catch (IOException e) {
+			  System.out.println("Failed to close server.");
+		  }
 		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  //DON'T FORGET
+		  System.exit(0);
 	  }
 	  
 	  else if (command[0].equals("#stop")) {
@@ -119,8 +117,6 @@ public class EchoServer extends AbstractServer
 	  }
 	  
 	  else if (command[0].equals("#start")) { 
-		  //NOT SURE IF THE IF STATEMENT IS NEEDED BECAUSE THE METHOD DOES NOTHING IF THE
-		  //SERVER IS ALREADY LISTENING
 		  if (!isListening()) {
 			  try {
 				  listen();
@@ -133,7 +129,6 @@ public class EchoServer extends AbstractServer
 	  }
 	  
 	  else if (command[0].equals("#getport")) { 
-		  //MIGHT HAVE TO MAKE SURE THEY ARE CONNECTED. DON'T THINK SO
 		  serverUI.display("Port: " + getPort());
 	  }
 	  
@@ -151,15 +146,43 @@ public class EchoServer extends AbstractServer
   public void handleMessageFromClient
     (Object msg, ConnectionToClient client)
   {
-	  if (msg.toString().startsWith("#login")) {
-		  System.out.println("Message received: " + msg + " from " + client);
-		  String[] loginCommand = msg.toString().split(" ");
+	  serverUI.display("Message received: " + msg + " from " + client.getInfo("loginID"));
+	  
+	  if (msg.toString().startsWith("#disconnect")) {
+		  clientDisconnected(client);
+	  }
+	  
+	  else if (msg.toString().startsWith("#login")) {		  
+		  if (client.getInfo("loginID") == null) {
+			  String[] loginCommand = msg.toString().split(" ");
+			  
+			  client.setInfo("loginID", loginCommand[1]);  
+			  serverUI.display(client.getInfo("loginID") + " has logged on.");
+			  this.sendToAllClients(client.getInfo("loginID") + " has logged on.");
+		  }
 		  
-		  client.setInfo("loginID", loginCommand[1]);
+		  else {			  
+			  try {
+				  client.sendToClient("You have already logged in and can not again.");
+			  }
+			  
+			  catch (IOException e) {
+				  serverUI.display("Could not display error to client.");
+			  }
+			  
+			  try {
+				  client.close();
+			  }
+			  
+			  catch (IOException e) {
+				  serverUI.display("Could not close client connection.");
+			  }
+			  
+		  }
 	  }
 	  
 	  else {
-		  this.sendToAllClients(client.getInfo("loginID") + ": " + msg);  
+		  this.sendToAllClients(client.getInfo("loginID") + "> " + msg);  
 	  }
   }
     
@@ -189,9 +212,8 @@ public class EchoServer extends AbstractServer
    * @param client the connection connected to the client.
    */
   protected void clientConnected(ConnectionToClient client) {
-	  String conMsg = "A client has connected.";
+	  String conMsg = "A new client has connected to the server.";
 	  System.out.println(conMsg);
-	  this.sendToAllClients(conMsg);
   }
   
   /**
@@ -202,7 +224,7 @@ public class EchoServer extends AbstractServer
    * @param client the connection with the client.
    */
   synchronized protected void clientDisconnected(ConnectionToClient client) {
-	  String discMsg = "A client has disconnected.";
+	  String discMsg = client.getInfo("loginID") + " has disconnected.";
 	  System.out.println(discMsg);
 	  this.sendToAllClients(discMsg);
   }

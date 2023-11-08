@@ -60,7 +60,7 @@ public class ClientConsole implements ChatIF
     } 
     catch(IOException exception) 
     {
-      System.out.println("Error: Can't setup connection!"
+      System.out.println("ERROR - Can't setup connection!"
                 + " Terminating client.");
       System.exit(1);
     }
@@ -108,7 +108,7 @@ public class ClientConsole implements ChatIF
 		  System.out.println(message);
 	  }
 	  else {
-		  System.out.println("> " + message);
+		  System.out.println(message);
 	  }
   }
 
@@ -131,12 +131,12 @@ public class ClientConsole implements ChatIF
 	  }
 	  
 	  catch(ArrayIndexOutOfBoundsException e) {
-		  System.out.println("No login ID found. Ending the program.");
+		  System.out.println("ERROR - No login ID specified. Connection aborted.");
 		  System.exit(0);
 	  }
 	  
 	  catch(NumberFormatException e) {
-		  System.out.println("No login ID found. Ending the program.");
+		  System.out.println("ERROR - No login ID specified. Connection aborted.");
 		  System.exit(0);
 	  }
 	  
